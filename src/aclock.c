@@ -10,6 +10,7 @@
 #define BLUE    0,  0,255
 #define RED  0.77, 0.16, 0.13
 #define BLACK   0,  0, 0
+#define BACKGROUND   0,  0, 0
 #define WIDTH 3
 
 static char buffer[256];
@@ -19,7 +20,7 @@ static int seconds;
 static int minutes;
 static int hours;
 static int radius;
-static int movingSecondsEffect = FALSE;
+static int movingSecondsEffect = TRUE;
 
 static void toggleMovingSeconds()
 {
@@ -47,19 +48,19 @@ static void show_hide_frame(GtkWindow *window)
 }
 
 int show_popup(GtkWidget *widget, GdkEvent *event) {
-  
+
   const int RIGHT_CLICK = 3;
-    
+
   if (event->type == GDK_BUTTON_PRESS) {
-      
+
       GdkEventButton *bevent = (GdkEventButton *) event;
-      
-      if (bevent->button == RIGHT_CLICK) {      
-          
+
+      if (bevent->button == RIGHT_CLICK) {
+
           gtk_menu_popup(GTK_MENU(widget), NULL, NULL, NULL, NULL,
               bevent->button, bevent->time);
       }
-          
+
       return TRUE;
   }
 
@@ -79,8 +80,8 @@ void DrawTickAt (GtkWidget *widget, cairo_t *cr, int nHour, int cx, int cy)
    int x2 = cx+(int) ((1.0 * radius * sin (dRadians)));
    int y2 = cy-(int) ((1.0 * radius * cos (dRadians)));
 
-   //cairo_set_source_rgb(cr, BLUE);
-   cairo_set_source_rgb(cr, WHITE);
+   // cairo_set_source_rgb(cr, WHITE);
+   cairo_set_source_rgb(cr, RED);
    cairo_set_line_width(cr, 2);
    cairo_move_to(cr, x1, y1);
    cairo_line_to(cr, x2, y2);
@@ -92,12 +93,13 @@ void DrawSeconds (GtkWidget *widget, cairo_t *cr, int cx, int cy)
 {
    /* --- Get radians from seconds --- */
    float dRadians = seconds * 3.14 / 30.0;
-    
+
    /* --- Draw seconds --- */
-   cairo_set_source_rgb(cr, WHITE);
+   // cairo_set_source_rgb(cr, WHITE);
+   cairo_set_source_rgb(cr, RED);
    cairo_set_line_width(cr, WIDTH);
    cairo_move_to(cr, cx, cy);
-   cairo_line_to(cr, 
+   cairo_line_to(cr,
                    cx + (0.9 * radius * sin (dRadians)),
                    cy - (0.9 * radius * cos (dRadians)));
    cairo_stroke(cr);
@@ -108,12 +110,13 @@ void DrawMinutes (GtkWidget *widget, cairo_t *cr, int cx, int cy)
    /* --- Get radians from seconds --- */
    float dRadians = (minutes * 3.14 / 30.0) +
                     (seconds * 3.14 / 1800.0);
-    
+
    /* --- Draw seconds --- */
-   cairo_set_source_rgb(cr, WHITE);
+   // cairo_set_source_rgb(cr, WHITE);
+   cairo_set_source_rgb(cr, RED);
    cairo_set_line_width(cr, WIDTH * 2);
    cairo_move_to(cr, cx, cy);
-   cairo_line_to(cr, 
+   cairo_line_to(cr,
                    cx + (0.7 * radius * sin (dRadians)),
                    cy - (0.7 * radius * cos (dRadians)));
    cairo_stroke(cr);
@@ -124,12 +127,13 @@ void DrawHours (GtkWidget *widget, cairo_t *cr, int cx, int cy)
    /* --- Get radians from seconds --- */
    float dRadians = ( (hours % 12) * 3.14 / 6.0) +
                     (  minutes * 3.14 / 360.0);
-    
+
    /* --- Draw seconds --- */
-   cairo_set_source_rgb(cr, WHITE);
+   // cairo_set_source_rgb(cr, WHITE);
+   cairo_set_source_rgb(cr, RED);
    cairo_set_line_width(cr, WIDTH * 3);
    cairo_move_to(cr, cx, cy);
-   cairo_line_to(cr, 
+   cairo_line_to(cr,
                    cx + (0.5 * radius * sin (dRadians)),
                    cy - (0.5 * radius * cos (dRadians)));
    cairo_stroke(cr);
@@ -148,22 +152,22 @@ static gboolean draw_cb(GtkWidget *widget, cairo_t *cr, gpointer data)
    }
 
    /* draw horizontal line */
-   //cairo_set_source_rgb(cr, BLUE);
+   //cairo_set_source_rgb(cr, RED);
    //cairo_set_line_width(cr, WIDTH);
    //cairo_move_to(cr, midx-60, 160);
    //cairo_line_to(cr, midx+60, 160);
    //cairo_stroke(cr);
 
-   //cairo_set_source_rgb(cr, RED);
-   cairo_set_source_rgb(cr, WHITE);
+   // cairo_set_source_rgb(cr, WHITE);
+   cairo_set_source_rgb(cr, RED);
    /*cairo_select_font_face (cr, "Georgia",
             CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD); */
    cairo_set_font_size (cr, 30);
    cairo_move_to(cr, midx-(midx/2),midy/2);
    cairo_show_text(cr, buffer);
 
-   //cairo_set_source_rgb(cr, BLUE);
-   cairo_set_source_rgb(cr, WHITE);
+   // cairo_set_source_rgb(cr, WHITE);
+   cairo_set_source_rgb(cr, RED);
    radius = MIN (midx, midy) -2 ;
    cairo_move_to(cr, midx , 0);
 
@@ -245,42 +249,42 @@ static void activate (GtkApplication* app, gpointer        user_data)
   g_signal_connect(window, "button-press-event", G_CALLBACK(clicked), NULL);
 
   pmenu = gtk_menu_new();
-  
+
   secondsMenuItem = gtk_menu_item_new_with_label("Show/Hide Moving Seconds");
   gtk_widget_show(secondsMenuItem);
   gtk_menu_shell_append(GTK_MENU_SHELL(pmenu), secondsMenuItem);
-  
+
   frameMenuItem = gtk_menu_item_new_with_label("Show/Hide Frame");
   gtk_widget_show(frameMenuItem);
   gtk_menu_shell_append(GTK_MENU_SHELL(pmenu), frameMenuItem);
-  
+
   hideMenuItem = gtk_menu_item_new_with_label("Minimize");
   gtk_widget_show(hideMenuItem);
   gtk_menu_shell_append(GTK_MENU_SHELL(pmenu), hideMenuItem);
-  
+
   quitMenuItem = gtk_menu_item_new_with_label("Quit");
   gtk_widget_show(quitMenuItem);
   gtk_menu_shell_append(GTK_MENU_SHELL(pmenu), quitMenuItem);
-  
-  g_signal_connect_swapped(G_OBJECT(secondsMenuItem), "activate", 
-      G_CALLBACK(toggleMovingSeconds), NULL);    
-  
-  g_signal_connect_swapped(G_OBJECT(frameMenuItem), "activate", 
-      G_CALLBACK(show_hide_frame), GTK_WINDOW(window));    
-  
-  g_signal_connect_swapped(G_OBJECT(hideMenuItem), "activate", 
-      G_CALLBACK(gtk_window_iconify), GTK_WINDOW(window));    
-  
-  g_signal_connect_swapped(G_OBJECT(quitMenuItem), "activate", 
-      G_CALLBACK(quit_application), app);  
-      //G_CALLBACK(gtk_main_quit), NULL);  
+
+  g_signal_connect_swapped(G_OBJECT(secondsMenuItem), "activate",
+      G_CALLBACK(toggleMovingSeconds), NULL);
+
+  g_signal_connect_swapped(G_OBJECT(frameMenuItem), "activate",
+      G_CALLBACK(show_hide_frame), GTK_WINDOW(window));
+
+  g_signal_connect_swapped(G_OBJECT(hideMenuItem), "activate",
+      G_CALLBACK(gtk_window_iconify), GTK_WINDOW(window));
+
+  g_signal_connect_swapped(G_OBJECT(quitMenuItem), "activate",
+      G_CALLBACK(quit_application), app);
+      //G_CALLBACK(gtk_main_quit), NULL);
 
   g_signal_connect_swapped(G_OBJECT(window), "destroy",
       G_CALLBACK(quit_application), app);
       //G_CALLBACK(gtk_main_quit), NULL);
-        
-  g_signal_connect_swapped(G_OBJECT(ebox), "button-press-event", 
-      G_CALLBACK(show_popup), pmenu);  
+
+  g_signal_connect_swapped(G_OBJECT(ebox), "button-press-event",
+      G_CALLBACK(show_popup), pmenu);
 
 
   g_timeout_add (1000, (GSourceFunc) time_handler, drawing_area);
@@ -295,7 +299,7 @@ int main (int    argc, char **argv)
 
   app = gtk_application_new ("org.gtk.clock", G_APPLICATION_FLAGS_NONE);
   g_signal_connect (app, "activate", G_CALLBACK (activate), NULL);
- 
+
   status = g_application_run (G_APPLICATION (app), argc, argv);
   g_object_unref (app);
 
